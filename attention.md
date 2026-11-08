@@ -78,3 +78,37 @@ Embedding 是训练出来的，不是人手写的词典定义。
 - 向量维度不等于词语数量
 - 模型不是先生成一个固定的“句子向量”再思考全部内容
 - Attention 是数学上的信息加权机制，不等于人类意识
+
+## QKV 与 Attention 的计算
+
+每一层 Attention 会把当前隐藏状态 `X` 变成三种角色：
+
+```text
+Q = XW_Q
+K = XW_K
+V = XW_V
+```
+
+- `Q`：当前 Token 想查询什么
+- `K`：这个 Token 可以用什么标签被找到
+- `V`：这个 Token 被找到后提供什么内容
+
+`W_Q`、`W_K`、`W_V` 是训练得到的参数矩阵。
+
+### Attention
+
+当前 Token 的 Query 会与所有允许看到的 Key 计算匹配分数：
+
+```text
+score(i, j) = Q_i · K_j
+```
+
+分数经过 Softmax 变成权重，再按权重混合 Value：
+
+```text
+Attention(Q, K, V) = softmax(QKᵀ / √d)V
+```
+
+不是只挑一个 Token，而是给多个 Token 分配不同权重。因果语言模型还会用遮罩阻止当前位置看到未来 Token。
+
+RoPE 通过旋转 Q、K 的部分维度表达相对位置，与直接向 Embedding 加位置向量的方式不同。
